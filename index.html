@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head> 
+    <title>console.js Example</title>
+    <meta content='width=device-width, initial-scale=1.0, interactive-widget=resizes-content' name='viewport'/>  
+    <script src="console.js"></script>
+  </head>
+  <body>
+    Add '?console=true' to URL params or <a href="?console=true">click here</a> 
+    
+    <script>
+      setTimeout(() => {
+	     console.log("This is a log message!");
+	     console.warn("This is a warning!");
+	     console.error(new Error("This is a thrown error!"));
+	     console.info("This is an informational message.");
+	     console.debug("This is a debug message.");
+	   }, 1000);
+    </script>
+    
+  </body>
+</html>
