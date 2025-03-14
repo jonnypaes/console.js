@@ -1,4 +1,4 @@
-# Recursive HTML
+# Console.js
 
 Read console calls on your mobile with this simple tool.
 
