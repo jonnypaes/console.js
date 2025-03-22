@@ -17,7 +17,7 @@ Read console calls on your mobile with this simple tool.
 
 Have a front-end console capture tool, to check errors in your mobile
 
-Add a simple boolean debug param to the URL and it's done.
+Simply add 'true' to a console param in the URL and it's done.
 
 ---
 
