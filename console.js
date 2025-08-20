@@ -82,8 +82,7 @@
             padding: "10px",
             boxSizing: "border-box",
             overflowY: "scroll",
-            height: "50%",
-            touchAction: "auto",
+            height: "50%"
         },
         consoleEntry: {
             display: "flex",
