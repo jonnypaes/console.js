@@ -222,13 +222,12 @@
 
             // Touch events			
             document.addEventListener('touchmove', (e) => {
-                if (e.target !== document.body) {
+                // Only prevent default if user is resizing
+                if (isResizing) {
                     e.preventDefault();
-                };
-                handleResize(e);
-            }, {
-                passive: false
-            });
+                    handleResize(e);
+                }
+            }, { passive: false });
             
             document.addEventListener('touchend', stopResizing, {
                 passive: true
