@@ -1,0 +1,85 @@
+# .github/workflows/generate-minify.yml
+name: Generate Minified JS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Capture triggering commit (short)
+        id: trigger
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          echo "sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+
+      - name: Determine if console.js changed
+        id: check_changed
+        run: |
+          # Determine the correct range depending on event type
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+            HEAD_SHA="${{ github.sha }}"
+          fi
+
+          echo "Comparing $BASE_SHA..$HEAD_SHA"
+          # Try to fetch the SHAs (fetch-depth: 0 already helps, but ensure)
+          git fetch --no-tags --prune origin "$BASE_SHA" "$HEAD_SHA" || true
+
+          if git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -q '^console.js$'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Terser
+        if: steps.check_changed.outputs.changed == 'true'
+        run: npm install -g terser
+
+      - name: Minify console.js
+        if: steps.check_changed.outputs.changed == 'true'
+        run: npx terser console.js --compress --mangle -o console-min.js
+
+      - name: Commit and push minified file (only if changed)
+        if: steps.check_changed.outputs.changed == 'true'
+        run: |
+          git config user.name "jonnypaes"
+          git config user.email "jonny.paes@gmail.com"
+
+          git add console-min.js
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit for console-min.js"
+            exit 0
+          fi
+
+          git commit -m "Generated console-min.js (source: $TRIGGER_SHA) [skip ci]"
+          git push
+        env:
+          TRIGGER_SHA: ${{ steps.trigger.outputs.sha }}
+
+      - name: Skip message
+        if: steps.check_changed.outputs.changed == 'false'
+        run: echo "console.js did not change — skipping minify and push."

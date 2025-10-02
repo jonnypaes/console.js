@@ -1,6 +1,6 @@
 # Console.js
 
-Read console calls on your mobile with this simple tool.
+Read console calls across multiple browsers with this simple tool.
 
 ---
 
@@ -15,7 +15,7 @@ Read console calls on your mobile with this simple tool.
 
 ## Description
 
-Have a front-end console capture tool, to check errors in your mobile
+A javascript tool to runtime capture console logs across multiple devices and browsers.
 
 Simply add 'true' to a console param in the URL and it's done.
 
@@ -59,4 +59,3 @@ https://jonnypaes.github.io/console.js/?console=true
 
 ### Partially Done ⚠️
 - Error stack parser kinda buggy
-- Fix odd behavior of touch API (move)
