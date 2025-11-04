@@ -226,7 +226,7 @@
                     e.preventDefault();
                     handleResize(e);
                 }
-            }, { passive: false });
+            }, { passive: true });
             
             document.addEventListener('touchend', stopResizing, {
                 passive: true
