@@ -35,6 +35,12 @@ Or you can import from a third-party (GitHub) inside the `<head>` tag:
 <script src="https://jonnypaes.github.io/console.js/console.js"></script>
 ```
 
+You can also import a minified version:
+
+```html
+<script src="https://jonnypaes.github.io/console.js/console-min.js"></script>
+```
+
 ---
 
 ## Activate
@@ -45,7 +51,7 @@ Simply add `?console=true` at the end of the URL and you will trigger the consol
 https://jonnypaes.github.io/console.js/?console=true
 ```
 
-[Try it here](https://jonnypaes.github.io/console.js/?console=true)
+[Try it here](https://jonnypaes.github.io/console.js)
 
 
 ---
@@ -59,3 +65,4 @@ https://jonnypaes.github.io/console.js/?console=true
 
 ### Partially Done ⚠️
 - Error stack parser kinda buggy
+
