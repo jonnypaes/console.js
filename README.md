@@ -23,22 +23,22 @@ Simply add 'true' to a console param in the URL and it's done.
 
 ## Import
 
-You can host on your server and call it inside the `<head>` tag:
+You can host on your server and call it inside the `<head>` tag (preferably on top):
 
 ```html
 <script src="console.js"></script>
 ```
 
-Or you can import from a third-party (GitHub) inside the `<head>` tag:
-
-```html
-<script src="https://jonnypaes.github.io/console.js/console.js"></script>
-```
-
-You can also import a minified version:
+You can also import the original or minified "-min" from a third-party (GitHub) inside the `<head>` tag:
 
 ```html
 <script src="https://jonnypaes.github.io/console.js/console-min.js"></script>
+```
+
+And last but not least, you can use a minified version from JSDelivr (Recommended):
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/jonnypaes/console.js/console-min.js"></script>
 ```
 
 ---
@@ -65,4 +65,5 @@ https://jonnypaes.github.io/console.js/?console=true
 
 ### Partially Done ⚠️
 - Error stack parser kinda buggy
+
 
