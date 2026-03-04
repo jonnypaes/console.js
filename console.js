@@ -3,33 +3,28 @@
  * @file console.js
  * @description A lightweight, mobile-friendly on-screen console debugger.
  * @version 1.0.0
- * @compatibility Minimal ES Version: ES6 (ES2015)
- * @notes Requires Proxy support (Chrome 49+, Firefox 18+, Safari 10+).
- * Optimized for touch-based resizing and error stack parsing.
+ * @compatibility Minimal ES Version: ES5 (Works on Chrome 39+, iOS 9+, etc.)
+ * @notes No Proxy required. Optimized for legacy mobile browsers.
  */
 
 !function() {
 
     // Initialize variables
-    let isResizing = false;
-    let lastY = 0;
+    var isResizing = false;
+    var lastY = 0;
 
     // Get URL parameters and extract "console" parameter value
-    const getParams = (() => {
-        const params = new Map(
-            location.search
-            .slice(1)
-            .split('&')
-            .filter(p => p) // remove empty strings
-            .map(p => {
-                const [k, v] = p.split('=');
-                // Only return the decoded value if it's provided; otherwise, set to false.
-                return [k, v !== undefined ? decodeURIComponent(v) : false];
-            })
-        );
-        return key => params.get(key) ?? false;
+    var getParams = (function() {
+        var params = {};
+        var search = location.search.slice(1).split('&');
+        for (var i = 0; i < search.length; i++) {
+            if (!search[i]) continue;
+            var pair = search[i].split('=');
+            params[pair[0]] = pair[1] !== undefined ? decodeURIComponent(pair[1]) : false;
+        }
+        return function(key) { return params[key] !== undefined ? params[key] : false; };
     })();
-
+    
     const isConsole = getParams("console") === "true";
     const isLink = getParams("link") === "true";
 
@@ -101,7 +96,24 @@
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)"
         }
     };
-
+    
+    var resetStyles = {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+        position: "fixed",
+        bottom: "0",
+        left: "0",
+        margin: "0",
+        padding: "0",
+        zIndex: "2147483647", // Max 32-bit Int
+        backgroundColor: "transparent",
+        border: "none",
+        textAlign: "left",
+        lineHeight: "normal"
+    };
+    
     // Only override console functions if isConsole is true
     if (isConsole) {
         try {
@@ -130,17 +142,17 @@
             // Store the logs in a Queue and wait until body is ready
             function processQueue() {
                 domReady = true;
-                logQueue.forEach(({
-                    msg,
-                    type
-                }) => addToConsole(msg, type));
+                for (var i = 0; i < logQueue.length; i++) {
+                    addToConsole(logQueue[i].msg, logQueue[i].type);
+                }
                 logQueue = []; // Clear the queue
             };
 
             // Override console.log
             console.log = function(...args) {
-                originalConsoleLog.apply(console, args);
-                safeAddToConsole(args.join(' '), 'log');
+                var args = Array.prototype.slice.call(arguments);
+                    if (originalConsoleLog) originalConsoleLog.apply(console, args);
+                    safeAddToConsole(args.join(' '), 'log');
             };
 
             // Override console.warn
@@ -178,18 +190,11 @@
 
         //Apply the CSS to the body
         function applyStyles(element, styleObject) {
-            const proxy = new Proxy(styleObject, {
-                set(target, prop, value) {
-                    if (prop in element.style) {
-                        element.style[prop] = value;
-                    } else {
-                        console.warn(`Invalid CSS property: ${prop}`);
-                    }
-                    return true;
+            for (var prop in styleObject) {
+                if (styleObject.hasOwnProperty(prop)) {
+                    element.style[prop] = styleObject[prop];
                 }
-            });
-
-            Object.assign(proxy, styleObject);
+            }
         };
 
         function modifyBody() {
@@ -198,7 +203,7 @@
 
             // Create the console output and resize handle dynamically
             const frameContainer = document.createElement('div');
-            frameContainer.id = 'frameContainer';
+            frameContainer.id = 'debug-console-root'; // frameContainer.id = 'frameContainer';
             applyStyles(frameContainer, styles.frameContainer);
 
             const resizeHandle = document.createElement('div');
@@ -211,10 +216,10 @@
 
             frameContainer.appendChild(resizeHandle);
             frameContainer.appendChild(outputContainer);
-            document.body.appendChild(frameContainer);
+            (document.body || document.documentElement).appendChild(frameContainer); // document.body.appendChild(frameContainer);
 
             // Set initial height of console output **after** it's created
-            outputContainer.style.height = `${window.screen.height / 3}px`;
+            outputContainer.style.height = (window.screen.height / 3) + "px";
 
             // Mouse events
             resizeHandle.addEventListener('mousedown', startResizing);
@@ -488,14 +493,15 @@
             formattedContent += '.line-number { color: #888; margin-right: 1ch; }';
             formattedContent += '.highlight-line { background-color: darkgoldenrod; }';
             formattedContent += '</style></head><body id="viewsource">';
-
-            lines.forEach((line, i) => {
+            
+            for (var i = 0; i < lines.length; i++) {
                 const lineNumber = i + 1;
                 const highlightClass = (lineNumber === errorLine) ? 'highlight-line' : '';
-                const lineText = escapeHtml(line);
-                formattedContent += `<span id="L${lineNumber}"><span class="line-number">${lineNumber}</span><span class="line-content ${highlightClass}">${String(lineText)}</span></span>\n`;
-            });
-
+                var lineText = escapeHtml(lines[i]);
+                // formattedContent += `<span id="L${lineNumber}"><span class="line-number">${lineNumber}</span><span class="line-content ${highlightClass}">${String(lineText)}</span></span>\n`;
+                formattedContent += '<span id="L' + lineNumber + '"><span class="line-number">' + lineNumber + '</span>...';
+            }
+            
             formattedContent += '</body></html>';
             const blob = new Blob([formattedContent], {
                 type: 'text/html'
@@ -518,7 +524,7 @@
         };
 
         // Call the functions at page loading
-        window.addEventListener("load", () => {
+        window.addEventListener("load", function() {
             modifyBody();
             processQueue();
         });
