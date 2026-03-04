@@ -114,69 +114,66 @@
 
             // Queue to store messages before the DOM is ready
             let logQueue = [];
-            let domReady = false;
-
-            // Ensure the DOM is ready before calling addToConsole
+            var domReady = false;
+    
             function safeAddToConsole(msg, type) {
                 if (domReady) {
                     addToConsole(msg, type);
                 } else {
-                    logQueue.push({
-                        msg,
-                        type
-                    });
+                    logQueue.push({ msg: msg, type: type });
                 }
-            };
-
-            // Store the logs in a Queue and wait until body is ready
+            }
+    
             function processQueue() {
                 domReady = true;
-                for (var i = 0; i < logQueue.length; i++) {
-                    addToConsole(logQueue[i].msg, logQueue[i].type);
+                while (logQueue.length > 0) {
+                    var item = logQueue.shift();
+                    addToConsole(item.msg, item.type);
                 }
-                logQueue = []; // Clear the queue
-            };
-
-            // Override console.log
-            console.log = function(...args) {
-                var args = Array.prototype.slice.call(arguments);
+            }
+    
+            // --- CONSOLE OVERRIDES ---
+            try {
+                const originalConsoleLog = console.log;
+                const originalConsoleWarn = console.warn;
+                const originalConsoleError = console.error;
+                const originalConsoleDebug = console.debug;
+                const originalConsoleInfo = console.info;
+    
+                console.log = function() {
+                    var args = Array.prototype.slice.call(arguments);
                     if (originalConsoleLog) originalConsoleLog.apply(console, args);
                     safeAddToConsole(args.join(' '), 'log');
-            };
-
-            // Override console.warn
-            console.warn = function(...args) {
-                originalConsoleWarn.apply(console, args);
-                safeAddToConsole(args.join(' '), 'warn');
-            };
-
-            // Override console.error
-            console.error = function(...args) {
-                originalConsoleError.apply(console, args);
-                const error = args[0];
-                if (error instanceof Error) {
-                    safeAddToConsole(error, 'error'); // Pass the actual Error object
-                } else {
-                    safeAddToConsole(String(error), 'error'); // Handle non-Error messages
-                }
-            };
-
-            // Override console.info (using debug as base)
-            console.info = function(...args) {
-                originalConsoleDebug.apply(console, args);
-                safeAddToConsole(args.join(' '), 'info');
-            };
-
-            // Override console.debug
-            console.debug = function(...args) {
-                originalConsoleDebug.apply(console, args);
-                safeAddToConsole(args.join(' '), 'debug');
-            };
-        } catch (e) {
-            console.error("Error setting up debug console:", e);
-            alert("error: " + e.message);
-        };
-
+                };
+    
+                console.warn = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    if (originalConsoleWarn) originalConsoleWarn.apply(console, args);
+                    safeAddToConsole(args.join(' '), 'warn');
+                };
+    
+                console.error = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    if (originalConsoleError) originalConsoleError.apply(console, args);
+                    var error = args[0];
+                    safeAddToConsole(error instanceof Error ? error : String(error), 'error');
+                };
+    
+                console.info = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    if (originalConsoleInfo) originalConsoleInfo.apply(console, args);
+                    safeAddToConsole(args.join(' '), 'info');
+                };
+    
+                console.debug = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    if (originalConsoleDebug) originalConsoleDebug.apply(console, args);
+                    safeAddToConsole(args.join(' '), 'debug');
+                };
+            } catch (e) {
+                alert("Error setting up console: " + e.message);
+            }
+        
         //Apply the CSS to the body
         function applyStyles(element, styleObject) {
             for (var prop in styleObject) {
