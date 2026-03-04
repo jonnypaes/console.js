@@ -102,78 +102,71 @@
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)"
         }
     };
-    
-    // Only override console functions if isConsole is true
-    if (isConsole) {
-        try {
-            // Preserve original console methods
-            const originalConsoleLog = console.log;
-            const originalConsoleWarn = console.warn;
-            const originalConsoleError = console.error;
-            const originalConsoleDebug = console.debug;
 
-            // Queue to store messages before the DOM is ready
-            let logQueue = [];
-            var domReady = false;
-    
-            function safeAddToConsole(msg, type) {
-                if (domReady) {
-                    addToConsole(msg, type);
-                } else {
-                    logQueue.push({ msg: msg, type: type });
-                }
+// Only override console functions if isConsole is true
+    if (isConsole) {
+        // --- QUEUE AND SCOPE SETUP ---
+        var logQueue = [];
+        var domReady = false;
+
+        var safeAddToConsole = function(msg, type) {
+            if (domReady) {
+                addToConsole(msg, type);
+            } else {
+                logQueue.push({ msg: msg, type: type });
             }
-    
-            function processQueue() {
-                domReady = true;
-                while (logQueue.length > 0) {
-                    var item = logQueue.shift();
-                    addToConsole(item.msg, item.type);
-                }
+        };
+
+        var processQueue = function() {
+            domReady = true;
+            while (logQueue.length > 0) {
+                var item = logQueue.shift();
+                addToConsole(item.msg, item.type);
             }
-    
-            // --- CONSOLE OVERRIDES ---
-            try {
-                const originalConsoleLog = console.log;
-                const originalConsoleWarn = console.warn;
-                const originalConsoleError = console.error;
-                const originalConsoleDebug = console.debug;
-                const originalConsoleInfo = console.info;
-    
-                console.log = function() {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (originalConsoleLog) originalConsoleLog.apply(console, args);
-                    safeAddToConsole(args.join(' '), 'log');
-                };
-    
-                console.warn = function() {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (originalConsoleWarn) originalConsoleWarn.apply(console, args);
-                    safeAddToConsole(args.join(' '), 'warn');
-                };
-    
-                console.error = function() {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (originalConsoleError) originalConsoleError.apply(console, args);
-                    var error = args[0];
-                    safeAddToConsole(error instanceof Error ? error : String(error), 'error');
-                };
-    
-                console.info = function() {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (originalConsoleInfo) originalConsoleInfo.apply(console, args);
-                    safeAddToConsole(args.join(' '), 'info');
-                };
-    
-                console.debug = function() {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (originalConsoleDebug) originalConsoleDebug.apply(console, args);
-                    safeAddToConsole(args.join(' '), 'debug');
-                };
-            } catch (e) {
-                alert("Error setting up console: " + e.message);
-            }
-        
+        };
+
+        // --- CONSOLE OVERRIDES ---
+        try {
+            var originalConsoleLog = console.log;
+            var originalConsoleWarn = console.warn;
+            var originalConsoleError = console.error;
+            var originalConsoleDebug = console.debug;
+            var originalConsoleInfo = console.info;
+
+            console.log = function() {
+                var args = Array.prototype.slice.call(arguments);
+                if (originalConsoleLog) originalConsoleLog.apply(console, args);
+                safeAddToConsole(args.join(' '), 'log');
+            };
+
+            console.warn = function() {
+                var args = Array.prototype.slice.call(arguments);
+                if (originalConsoleWarn) originalConsoleWarn.apply(console, args);
+                safeAddToConsole(args.join(' '), 'warn');
+            };
+
+            console.error = function() {
+                var args = Array.prototype.slice.call(arguments);
+                if (originalConsoleError) originalConsoleError.apply(console, args);
+                var error = args[0];
+                safeAddToConsole(error instanceof Error ? error : String(error), 'error');
+            };
+
+            console.info = function() {
+                var args = Array.prototype.slice.call(arguments);
+                if (originalConsoleInfo) originalConsoleInfo.apply(console, args);
+                safeAddToConsole(args.join(' '), 'info');
+            };
+
+            console.debug = function() {
+                var args = Array.prototype.slice.call(arguments);
+                if (originalConsoleDebug) originalConsoleDebug.apply(console, args);
+                safeAddToConsole(args.join(' '), 'debug');
+            };
+        } catch (e) {
+            alert("Error setting up console: " + e.message);
+        }
+   
         //Apply the CSS to the body
         function applyStyles(element, styleObject) {
             for (var prop in styleObject) {
