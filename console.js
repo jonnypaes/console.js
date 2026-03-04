@@ -8,7 +8,8 @@
  */
 
 !function() {
-
+    "use strict";
+    
     // Initialize variables
     var isResizing = false;
     var lastY = 0;
@@ -66,7 +67,12 @@
             width: "100%",
             position: "fixed",
             bottom: "0",
-            zIndex: "9999"
+            left: "0", 
+            margin: "0",
+            padding: "0",
+            zIndex: "2147483647",
+            backgroundColor: "transparent",
+            boxSizing: "border-box"
         },
         resizeHandle: {
             backgroundColor: "#444",
@@ -95,23 +101,6 @@
             borderRadius: "5px",
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)"
         }
-    };
-    
-    var resetStyles = {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-        position: "fixed",
-        bottom: "0",
-        left: "0",
-        margin: "0",
-        padding: "0",
-        zIndex: "2147483647", // Max 32-bit Int
-        backgroundColor: "transparent",
-        border: "none",
-        textAlign: "left",
-        lineHeight: "normal"
     };
     
     // Only override console functions if isConsole is true
@@ -480,26 +469,38 @@
         // Runtime create an object and open it
         function fullScreen(content, errorLine) {
             const lines = content.split('\n');
-            let formattedContent = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">';
-            formattedContent += '<title>View Source</title>';
-            formattedContent += '<meta content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" name="viewport"/>';
-            formattedContent += '<style>';
-            formattedContent += 'body { font-family: -moz-fixed; font-weight: normal; white-space: pre; background-color: #ffffff; color: #000000; padding: 12px; margin: 0; }';
-            formattedContent += '@media (prefers-color-scheme: dark) { body { background-color: #333333; color: #ffffff; } }';
-            formattedContent += 'span:not(.error), a:not(.error) { unicode-bidi: embed; }';
-            formattedContent += 'span[id] { display: block; }';
-            formattedContent += '#viewsource { font-family: -moz-fixed; font-weight: normal; white-space: pre; }';
-            formattedContent += ':root { color-scheme: light dark; direction: ltr; }';
-            formattedContent += '.line-number { color: #888; margin-right: 1ch; }';
-            formattedContent += '.highlight-line { background-color: darkgoldenrod; }';
-            formattedContent += '</style></head><body id="viewsource">';
             
+            var formattedContent = `<!DOCTYPE html>
+                                    <html lang="en">
+                                    <head>
+                                        <meta charset="UTF-8">
+                                        <title>View Source</title>
+                                        <meta content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" name="viewport"/>
+                                        <style>
+                                            body { font-family: -moz-fixed; font-weight: normal; white-space: pre; background-color: #ffffff; color: #000000; padding: 12px; margin: 0; }
+                                            @media (prefers-color-scheme: dark) { body { background-color: #333333; color: #ffffff; } }
+                                            span:not(.error), a:not(.error) { unicode-bidi: embed; }
+                                            span[id] { display: block; }
+                                            #viewsource { font-family: -moz-fixed; font-weight: normal; white-space: pre; }
+                                            :root { color-scheme: light dark; direction: ltr; }
+                                            .line { display: flex; white-space: pre; min-height: 1.2em; }
+                                            .line-number { color: #888; margin-right: 1ch; }
+                                            .highlight-line { background-color: darkgoldenrod; }
+                                        </style>
+                                    </head>
+                                    <body id="viewsource">`;
+   
             for (var i = 0; i < lines.length; i++) {
-                const lineNumber = i + 1;
-                const highlightClass = (lineNumber === errorLine) ? 'highlight-line' : '';
+                var lineNumber = i + 1;
+                var highlightClass = (lineNumber === errorLine) ? 'highlight-line' : '';
                 var lineText = escapeHtml(lines[i]);
+                
+                // Clean, non-nested SPAN structures
                 // formattedContent += `<span id="L${lineNumber}"><span class="line-number">${lineNumber}</span><span class="line-content ${highlightClass}">${String(lineText)}</span></span>\n`;
-                formattedContent += '<span id="L' + lineNumber + '"><span class="line-number">' + lineNumber + '</span>...';
+                formattedContent += '<span id="L' + lineNumber + '">' +
+                    '<span class="line-number">' + lineNumber + '</span>' +
+                    '<span class="line-content ' + highlightClass + '">' + lineText + '</span>' +
+                    '</span>\n'; // This closing span is vital!
             }
             
             formattedContent += '</body></html>';
