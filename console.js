@@ -1,4 +1,13 @@
 // console.js
+/**
+ * @file console.js
+ * @description A lightweight, mobile-friendly on-screen console debugger.
+ * @version 1.0.0
+ * @compatibility Minimal ES Version: ES6 (ES2015)
+ * @notes Requires Proxy support (Chrome 49+, Firefox 18+, Safari 10+).
+ * Optimized for touch-based resizing and error stack parsing.
+ */
+
 !function() {
 
     // Initialize variables
@@ -51,8 +60,6 @@
     // Define CSS
     const styles = {
         body: {
-            margin: "0",
-            padding: "0",
             overflowX: "hidden",
             height: "100vh"
         },
@@ -166,6 +173,7 @@
             };
         } catch (e) {
             console.error("Error setting up debug console:", e);
+            alert("error: " + e.message);
         };
 
         //Apply the CSS to the body
@@ -517,7 +525,5 @@
 
         // Welcoming first message
         console.debug("Welcome to console.js!");
-        
     };
-
 }();
